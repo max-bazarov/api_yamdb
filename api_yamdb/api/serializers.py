@@ -1,8 +1,8 @@
 from rest_framework import serializers
-from reviews.models import Genres
+from reviews.models import Genre
 
 
-class GenresSerializers(serializers.ModelSerializers):
+class GenreSerializer(serializers.ModelSerializers):
     class Meta:
-        model = Genres
-        fields = "__all__"
+        model = Genre
+        fields = '__all__'

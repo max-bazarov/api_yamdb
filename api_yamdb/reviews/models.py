@@ -2,7 +2,7 @@ from django.db import models
 
 
 # Create your models here.
-class Genres(models.Model):
+class Genre(models.Model):
     name = models.TextField()
     slug = models.SlugField(unique=True)
 

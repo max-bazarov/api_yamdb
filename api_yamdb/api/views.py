@@ -1,9 +1,9 @@
 from rest_framework import viewsets
 
-from api_yamdb.api.serializers import GenresSerializers
-from api_yamdb.reviews.models import Genres
+from api_yamdb.api.serializers import GenreSerializer
+from api_yamdb.reviews.models import Genre
 
 
 class GenresViewSet(viewsets.ModelViewSet):
-    queryset = Genres.objects.all()
-    serializer_class = GenresSerializers
+    queryset = Genre.objects.all()
+    serializer_class = GenreSerializer
