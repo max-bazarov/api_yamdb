@@ -2,6 +2,9 @@ from django.db import models
 from django.core.validators import MaxValueValidator, MinValueValidator
 
 
+TEXT_LENGTH: str = 15
+
+
 class Genre(models.Model):
     name = models.TextField()
     slug = models.SlugField(unique=True)
@@ -22,3 +25,29 @@ class Review(models.Model):
         related_name='reviews'
     )
     pub_date = models.DateTimeField(auto_now_add=True)
+    title = models.ForeignKey(
+        'Title',
+        on_delete=models.CASCADE,
+        related_name='reviews'
+    )
+
+    def __str__(self) -> str:
+        return self.text[:TEXT_LENGTH]
+
+
+class Comment(models.Model):
+    text = models.TextField()
+    author = models.ForeignKey(
+        'users.User',
+        on_delete=models.CASCADE,
+        related_name='comments'
+    )
+    review = models.ForeignKey(
+        Review,
+        on_delete=models.CASCADE,
+        related_name='comments'
+    )
+    pub_date = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self) -> str:
+        return self.text[:TEXT_LENGTH]
