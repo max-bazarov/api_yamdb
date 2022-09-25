@@ -2,6 +2,14 @@ from django.db import models
 from django.core.validators import MaxValueValidator, MinValueValidator
 
 
+class Genre(models.Model):
+    name = models.TextField()
+    slug = models.SlugField(unique=True)
+
+    def __str__(self) -> str:
+        return self.name
+
+
 class Review(models.Model):
     text = models.TextField()
     score = models.IntegerField(
