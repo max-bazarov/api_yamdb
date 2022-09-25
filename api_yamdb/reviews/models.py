@@ -1,5 +1,5 @@
-from django.db import models
 from django.core.validators import MaxValueValidator, MinValueValidator
+from django.db import models
 
 
 TEXT_LENGTH: str = 15
@@ -49,5 +49,10 @@ class Comment(models.Model):
     )
     pub_date = models.DateTimeField(auto_now_add=True)
 
+
+class Category(models.Model):
+    name = models.CharField(max_length=256)
+    slug = models.SlugField(max_length=50, unique=True)
+
     def __str__(self) -> str:
-        return self.text[:TEXT_LENGTH]
+        return self.name

@@ -1,7 +1,7 @@
 from rest_framework import viewsets
 
-from api_yamdb.api.serializers import GenreSerializer, CommentSerializer
-from api_yamdb.reviews.models import Genre, Comment
+from api_yamdb.api.serializers import CategorySerializer, GenreSerializer
+from api_yamdb.reviews.models import Category, Genre
 
 
 class GenresViewSet(viewsets.ModelViewSet):
@@ -9,6 +9,6 @@ class GenresViewSet(viewsets.ModelViewSet):
     serializer_class = GenreSerializer
 
 
-class CommentViewSet(viewsets.ModelViewSet):
-    queryset = Comment.objects.all()
-    serializer_class = CommentSerializer
+class CategoryViewSet(viewsets.ModelViewSet):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
