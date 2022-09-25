@@ -1,10 +1,10 @@
 from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
-from api_yamdb.api.views import GenresViewSet
+from api_yamdb.api.views import GenreViewSet
 
 router = DefaultRouter()
-router.register('genres', GenresViewSet, basename='genre')
+router.register('genres', GenreViewSet, basename='genre')
 
 urlpatterns = [
     path('v1/', include(router.urls)),
