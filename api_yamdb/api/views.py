@@ -6,8 +6,8 @@ from rest_framework.views import APIView
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets
 
-from api_yamdb.api.serializers import CategorySerializer, GenreSerializer
-from api_yamdb.reviews.models import Category, Genre
+from api.serializers import CategorySerializer, GenreSerializer, GetTokenSerializer, SignUpSerializer
+from reviews.models import Category, Genre
 
 
 class APIGetToken(APIView):
