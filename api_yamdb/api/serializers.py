@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from reviews.models import Category, Comment, Genre
+from users.models import User
 
 
 class GetTokenSerializer(serializers.ModelSerializer):
@@ -21,8 +22,6 @@ class SignUpSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('email', 'username')
-
-
 
 
 class GenreSerializer(serializers.ModelSerializers):
