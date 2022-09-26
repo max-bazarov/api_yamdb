@@ -1,8 +1,9 @@
-from api_yamdb.api.views import (CategoryViewSet, CommentViewSet, GenreViewSet,
-                                 ReviewViewSet, TitleViewSet)
+from .views import (CategoryViewSet, CommentViewSet, GenreViewSet,
+                    ReviewViewSet, TitleViewSet, APIGetToken, APISignup)
 from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 # APIGetToken, APISignup,
+app_name = 'api'
 
 router = DefaultRouter()
 router.register('genres', GenreViewSet, basename='genre')

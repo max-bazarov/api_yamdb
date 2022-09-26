@@ -3,13 +3,13 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.response import Response
 from rest_framework import permissions, status, viewsets
 from rest_framework.views import APIView
-from django.shortcuts import get_object_or_404
 from rest_framework import viewsets
 
-#from api.serializers import CategorySerializer, GenreSerializer, GetTokenSerializer, SignUpSerializer
-from api_yamdb.api.serializers import (CategorySerializer, GenreSerializer,
-                                       TitleSerializer)
-from api_yamdb.reviews.models import Category, Comment, Genre, Review, Title
+from .serializers import (
+    CategorySerializer, GenreSerializer,
+    TitleSerializer, GetTokenSerializer, SignUpSerializer,
+    CommentSerializer, ReviewSerializer)
+from reviews.models import Category, Comment, Genre, Review, Title
 from users.models import User
 
 
