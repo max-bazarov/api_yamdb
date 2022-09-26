@@ -1,16 +1,48 @@
-from django.db import models
 from django.core.validators import MaxValueValidator, MinValueValidator
+from django.db import models
 
 
 TEXT_LENGTH: str = 15
 
 
+class Category(models.Model):
+    name = models.CharField(max_length=256)
+    slug = models.SlugField(max_length=50, unique=True)
+
+    def __str__(self) -> str:
+        return self.name
+
+
 class Genre(models.Model):
-    name = models.TextField()
+    name = models.CharField(max_length=256)
     slug = models.SlugField(unique=True)
 
     def __str__(self) -> str:
         return self.name
+
+
+class Title(models.Model):
+    category = models.ForeignKey(
+        Category,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        verbose_name='категория'
+    )
+    genre = models.ManyToManyField(
+        Genre,
+        verbose_name='жанр'
+    )
+    name = models.TextField()
+    year = models.IntegerField()
+    description = models.TextField(
+        null=True,
+        verbose_name='Описание'
+    )
+
+    class Meta:
+        verbose_name = 'Произведение'
+        verbose_name_plural = 'Произведения'
 
 
 class Review(models.Model):
@@ -48,6 +80,3 @@ class Comment(models.Model):
         related_name='comments'
     )
     pub_date = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self) -> str:
-        return self.text[:TEXT_LENGTH]
