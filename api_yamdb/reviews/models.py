@@ -3,13 +3,16 @@ from django.db import models
 
 
 TEXT_LENGTH: str = 15
+
+
 class Category(models.Model):
     name = models.CharField(max_length=256)
     slug = models.SlugField(max_length=50, unique=True)
 
     def __str__(self) -> str:
         return self.name
-        
+
+
 class Genre(models.Model):
     name = models.CharField(max_length=256)
     slug = models.SlugField(unique=True)
@@ -17,15 +20,18 @@ class Genre(models.Model):
     def __str__(self) -> str:
         return self.name
 
+
 class Title(models.Model):
-    category =models.ForeignKey(
+    category = models.ForeignKey(
         Category,
         on_delete=models.CASCADE,
         null=True,
+        blank=True,
+        verbose_name='категория'
     )
-    genre = models.ForeignKey(
+    genre = models.ManyToManyField(
         Genre,
-        on_delete=models.CASCADE
+        verbose_name='жанр'
     )
     name = models.TextField()
     year = models.IntegerField()
@@ -74,6 +80,3 @@ class Comment(models.Model):
         related_name='comments'
     )
     pub_date = models.DateTimeField(auto_now_add=True)
-
-
-
