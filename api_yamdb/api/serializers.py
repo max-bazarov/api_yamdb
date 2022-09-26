@@ -2,6 +2,29 @@ from rest_framework import serializers
 from reviews.models import Category, Comment, Genre
 
 
+class GetTokenSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(
+        required=True)
+    confirmation_code = serializers.CharField(
+        required=True)
+
+    class Meta:
+        model = User
+        fields = (
+            'username',
+            'confirmation_code'
+        )
+
+
+class SignUpSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = User
+        fields = ('email', 'username')
+
+
+
+
 class GenreSerializer(serializers.ModelSerializers):
     class Meta:
         model = Genre
