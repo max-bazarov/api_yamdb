@@ -8,6 +8,7 @@ from rest_framework import viewsets
 
 from api.serializers import CategorySerializer, GenreSerializer, GetTokenSerializer, SignUpSerializer
 from reviews.models import Category, Genre
+from users.models import User
 
 
 class APIGetToken(APIView):
