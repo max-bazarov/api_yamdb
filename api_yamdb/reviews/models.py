@@ -33,7 +33,7 @@ class Title(models.Model):
         Genre,
         verbose_name='жанр'
     )
-    name = models.TextField()
+    name = models.CharField(max_length=256)
     year = models.IntegerField()
     description = models.TextField(
         null=True,

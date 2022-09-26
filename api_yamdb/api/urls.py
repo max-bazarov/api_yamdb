@@ -1,14 +1,7 @@
+from api_yamdb.api.views import (CategoryViewSet, CommentViewSet, GenreViewSet,
+                                 ReviewViewSet, TitleViewSet)
 from django.urls import include, path
 from rest_framework.routers import DefaultRouter
-
-from api_yamdb.api.views import (
-    CommentViewSet,
-    CategoryViewSet,
-    GenreViewSet,
-    TitleViewSet,
-    ReviewViewSet
-)
-
 
 router = DefaultRouter()
 router.register('genres', GenreViewSet, basename='genre')
