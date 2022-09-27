@@ -6,11 +6,16 @@ from rest_framework.views import APIView
 
 
 from api.serializers import (
-    CategorySerializer, GenreSerializer,
-    TitleSerializer, SignUpSerializer, GetTokenSerializer)
+    CategorySerializer,
+    CommentSerializer,
+    GenreSerializer,
+    GetTokenSerializer,
+    SignUpSerializer,
+    ReviewSerializer,
+    TitleSerializer)
+from api.permissions import IsAdminOrReadOnly
 from reviews.models import Category, Comment, Genre, Review, Title
 
-from .serializers import CommentSerializer, GenreSerializer, ReviewSerializer
 from users.models import User
 
 
@@ -37,6 +42,7 @@ class TitleViewSet(viewsets.ModelViewSet):
 class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
+    permission_classes = [IsAdminOrReadOnly]
 
 
 class APIGetToken(APIView):
