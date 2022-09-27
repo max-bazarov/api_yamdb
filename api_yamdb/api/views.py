@@ -5,8 +5,9 @@ from rest_framework import permissions, status, viewsets
 from rest_framework.views import APIView
 
 
-from api.serializers import (CategorySerializer, GenreSerializer,
-                             TitleSerializer)
+from api.serializers import (
+    CategorySerializer, GenreSerializer,
+    TitleSerializer, SignUpSerializer, GetTokenSerializer)
 from reviews.models import Category, Comment, Genre, Review, Title
 
 from .serializers import CommentSerializer, GenreSerializer, ReviewSerializer
