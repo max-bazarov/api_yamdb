@@ -1,7 +1,13 @@
 from django.core.management.base import BaseCommand, CommandError
-import sqlite3
+import os
 
+import sqlite3
 import pandas as pd
+
+from api_yamdb.settings import STATICFILES_DIRS
+
+
+DATA_PATH = os.path.join(STATICFILES_DIRS[0], 'data/')
 
 
 class Command(BaseCommand):
@@ -13,8 +19,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         conn = sqlite3.connect('db.sqlite3')
-        file_path = ('/Users/maxbazarov/Dev/yandex_praktikum/'
-                     'api_yamdb/api_yamdb/static/data/'
+        file_path = (DATA_PATH
                      + options['csv_name']
                      + '.csv')
         table_name = options['table_name']
