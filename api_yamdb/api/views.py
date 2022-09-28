@@ -22,6 +22,7 @@ from users.models import User
 class GenreViewSet(viewsets.ModelViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
+    permission_classes = [IsAdminOrReadOnly]
 
 
 class CommentViewSet(viewsets.ModelViewSet):
@@ -37,6 +38,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
     serializer_class = TitleSerializer
+    permission_classes = [IsAdminOrReadOnly]
 
 
 class CategoryViewSet(viewsets.ModelViewSet):
