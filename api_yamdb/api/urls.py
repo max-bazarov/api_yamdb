@@ -15,7 +15,7 @@ router.register(
     r'titles/(?P<title_id>\d+)/reviews',
     ReviewViewSet, basename='review'
 )
-router.register('categories', CategoryViewSet, basename='categorie')
+router.register('categories', CategoryViewSet, basename='category')
 
 urlpatterns = [
     path('v1/', include(router.urls)),
