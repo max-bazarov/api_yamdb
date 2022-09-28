@@ -8,6 +8,10 @@ class Category(models.Model):
     name = models.CharField(max_length=256)
     slug = models.SlugField(max_length=50, unique=True)
 
+    class Meta:
+        verbose_name = 'Category'
+        verbose_name_plural = 'Categories'
+
     def __str__(self) -> str:
         return self.name
 
@@ -26,11 +30,11 @@ class Title(models.Model):
         on_delete=models.CASCADE,
         null=True,
         blank=True,
-        verbose_name='категория'
+        verbose_name='Категория'
     )
     genre = models.ManyToManyField(
         Genre,
-        verbose_name='жанр'
+        verbose_name='Жанр'
     )
     name = models.CharField(max_length=256)
     year = models.IntegerField()
@@ -40,8 +44,7 @@ class Title(models.Model):
     )
 
     class Meta:
-        verbose_name = 'Произведение'
-        verbose_name_plural = 'Произведения'
+        verbose_name = 'Title'
 
 
 class Review(models.Model):
