@@ -13,7 +13,10 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         conn = sqlite3.connect('db.sqlite3')
-        file_path = '/Users/maxbazarov/Dev/yandex_praktikum/api_yamdb/api_yamdb/static/data/' + options['csv_name'] + '.csv'
+        file_path = ('/Users/maxbazarov/Dev/yandex_praktikum/'
+                     'api_yamdb/api_yamdb/static/data/'
+                     + options['csv_name']
+                     + '.csv')
         table_name = options['table_name']
         try:
             df = pd.read_csv(file_path)
