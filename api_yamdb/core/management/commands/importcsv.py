@@ -1,11 +1,10 @@
-from django.core.management.base import BaseCommand, CommandError
 import os
-
 import sqlite3
+
 import pandas as pd
+from django.core.management.base import BaseCommand, CommandError
 
 from api_yamdb.settings import STATICFILES_DIRS
-
 
 DATA_PATH = os.path.join(STATICFILES_DIRS[0], 'data/')
 
