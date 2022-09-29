@@ -1,7 +1,6 @@
 from rest_framework import permissions
 
 class IsAdminOrReadOnly(permissions.BasePermission):
-    """Разрешение на уровне админ."""
 
     def has_permission(self, request, view):
         return (
