@@ -1,8 +1,9 @@
 from django.core.mail import EmailMessage
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.response import Response
-from rest_framework import permissions, status, viewsets
+from rest_framework import permissions, mixins, status, viewsets
 from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 
 
 from api.serializers import (
@@ -19,7 +20,21 @@ from reviews.models import Category, Comment, Genre, Review, Title
 from users.models import User
 
 
-class GenreViewSet(viewsets.ModelViewSet):
+class UpdateDeleteViewSet(mixins.CreateModelMixin,
+    mixins.ListModelMixin,
+    mixins.DestroyModelMixin,
+    viewsets.GenericViewSet
+):
+    permission_classes = [
+        IsAuthenticatedOrReadOnly,
+        IsAdminOrReadOnly
+    ]
+    search_fields = ('name', 'slug')
+    lookup_field = 'slug'
+
+
+
+class GenreViewSet(UpdateDeleteViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
     permission_classes = [IsAdminOrReadOnly]
@@ -41,10 +56,9 @@ class TitleViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAdminOrReadOnly]
 
 
-class CategoryViewSet(viewsets.ModelViewSet):
+class CategoryViewSet(UpdateDeleteViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-    permission_classes = [IsAdminOrReadOnly]
 
 
 class APIGetToken(APIView):
