@@ -1,17 +1,16 @@
+from api.serializers import (CategorySerializer, GenreSerializer,
+                             GetTokenSerializer, SignUpSerializer,
+                             TitleSerializer)
 from django.core.mail import EmailMessage
-from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework.response import Response
 from rest_framework import permissions, status, viewsets
+from rest_framework.response import Response
 from rest_framework.views import APIView
-
-
-from api.serializers import (
-    CategorySerializer, GenreSerializer,
-    TitleSerializer, SignUpSerializer, GetTokenSerializer)
+from rest_framework_simplejwt.tokens import RefreshToken
 from reviews.models import Category, Comment, Genre, Review, Title
-
-from .serializers import CommentSerializer, GenreSerializer, ReviewSerializer
 from users.models import User
+
+from .permissions import AuthorOrReadOnly
+from .serializers import CommentSerializer, GenreSerializer, ReviewSerializer
 
 
 class GenreViewSet(viewsets.ModelViewSet):
@@ -22,11 +21,19 @@ class GenreViewSet(viewsets.ModelViewSet):
 class CommentViewSet(viewsets.ModelViewSet):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
+    permission_classes = [AuthorOrReadOnly]
+
+    def perform_create(self, serializer):
+        return serializer.save(author=self.request.user)
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer
+    permission_classes = [AuthorOrReadOnly]
+
+    def perform_create(self, serializer):
+        return serializer.save(author=self.request.user)
 
 
 class TitleViewSet(viewsets.ModelViewSet):
@@ -48,6 +55,8 @@ class APIGetToken(APIView):
         "confirmation_code": "string"
     }
     """
+    permission_classes = [permissions.AllowAny]
+
     def post(self, request):
         serializer = GetTokenSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -76,7 +85,7 @@ class APISignup(APIView):
         "username": "string"
     }
     """
-    permission_classes = (permissions.AllowAny,)
+    permission_classes = [permissions.AllowAny]
 
     @staticmethod
     def send_email(data):
