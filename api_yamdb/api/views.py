@@ -1,11 +1,11 @@
 from django.core.mail import EmailMessage
-from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.response import Response
 from rest_framework import permissions, mixins, status, viewsets
 from rest_framework.views import APIView
-from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
+from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
 from rest_framework.filters import SearchFilter
 from rest_framework.pagination import PageNumberPagination
+from django.shortcuts import get_object_or_404
 
 from api.serializers import (
     CategorySerializer,
@@ -19,7 +19,6 @@ from api.serializers import (
     ReviewSerializer,
 )
 from api.permissions import IsAdminOrReadOnly
-from api.paginations import ClassPagination
 
 from rest_framework_simplejwt.tokens import AccessToken
 from rest_framework.decorators import action
@@ -28,54 +27,71 @@ from django.contrib.auth.tokens import default_token_generator
 from reviews.models import Category, Comment, Genre, Review, Title
 from users.models import User
 
-from .permissions import AuthorOrReadOnly
-
-
-class UserViewSet(viewsets.ModelViewSet):
-    serializer_class = UserSerializer
-    lookup_field = 'username'
-
-    def get_permissions(self):
-        if self.action == 'get_user_me':
-            return [permissions.IsAuthenticated()]
-        return [permissions.IsAdminUser()]
-
-    def get_queryset(self):
-        queryset = User.objects.all()
-        username = self.request.query_params.get('username')
-        if username:
-            queryset = queryset.filter(username=username)
-        return queryset
-
-    @action(detail=False, methods=['get', 'patch'], url_path='me')
-    def get_user_me(self, request):
-        user = User.objects.get(username=request.user)
-        serializer = UserSerializer(user)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
+from .permissions import AuthorOrReadOnly, OwnerOrAdmins
 
 class UpdateDeleteViewSet(mixins.CreateModelMixin,
     mixins.ListModelMixin,
     mixins.DestroyModelMixin,
     viewsets.GenericViewSet
 ):
+    pagination_class = PageNumberPagination
+    filter_backends = (SearchFilter,)
+    search_fields = ('name', 'slug')
+    lookup_field = 'slug'
+class UserViewSet(UpdateDeleteViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    pagination_class = PageNumberPagination
+    permission_classes = (OwnerOrAdmins, )
+    filter_backends = (SearchFilter,)
+    filterset_fields = ('username')
+    search_fields = ('username', )
+    lookup_field = 'username'
+
+    @action(
+        methods=['get', 'patch'],
+        detail=False,
+        url_path='me',
+        permission_classes=(IsAuthenticated, )
+    )
+    def get_patch_me(self, request):
+        user = get_object_or_404(User, username=self.request.user)
+        if request.method == 'GET':
+            serializer = UserSerializer(user)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        if request.method == 'PATCH':
+            serializer = UserSerializer(user, data=request.data, partial=True)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+
+    
+
+class CategoryViewSet(UpdateDeleteViewSet):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
     permission_classes = [
         IsAuthenticatedOrReadOnly,
         IsAdminOrReadOnly
     ]
-    filter_backends = (SearchFilter,)
-    search_fields = ('name', 'slug')
-    lookup_field = 'slug'
-
-
-
 
 class GenreViewSet(UpdateDeleteViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
+    permission_classes = [
+        IsAuthenticatedOrReadOnly,
+        IsAdminOrReadOnly
+    ]
+
+
+
+class TitleViewSet(viewsets.ModelViewSet):
+    queryset = Title.objects.all()
+    serializer_class = TitleSerializer
     permission_classes = [IsAdminOrReadOnly]
     pagination_class = PageNumberPagination
-
 
 class CommentViewSet(viewsets.ModelViewSet):
     queryset = Comment.objects.all()
@@ -95,19 +111,6 @@ class ReviewViewSet(viewsets.ModelViewSet):
         title = Title.objects.get(id=self.kwargs.get('title_id'))
         return serializer.save(author=self.request.user,
                                title=title)
-
-
-class TitleViewSet(viewsets.ModelViewSet):
-    queryset = Title.objects.all()
-    serializer_class = TitleSerializer
-    permission_classes = [IsAdminOrReadOnly]
-    pagination_class = PageNumberPagination
-    
-
-
-class CategoryViewSet(UpdateDeleteViewSet):
-    queryset = Category.objects.all()
-    serializer_class = CategorySerializer
 
 
 class APIGetToken(APIView):

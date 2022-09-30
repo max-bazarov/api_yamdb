@@ -19,6 +19,8 @@ class GetTokenSerializer(serializers.ModelSerializer):
 
 
 class SignUpSerializer(serializers.ModelSerializer):
+    email = serializers.EmailField(max_length=254, required=True)
+    username = serializers.CharField(max_length=150, required=True)
     class Meta:
         model = User
         fields = ('email', 'username')
@@ -95,8 +97,7 @@ class CategorySerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
-    email = serializers.EmailField(required=True)
-
+    role = serializers.CharField(read_only=True)
     class Meta:
         model = User
         fields = ('username',
