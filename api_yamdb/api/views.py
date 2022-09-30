@@ -1,20 +1,34 @@
 from django.core.mail import EmailMessage
-from rest_framework import permissions, status, viewsets
+from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.response import Response
+from rest_framework import permissions, mixins, status, viewsets
 from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
+from rest_framework.filters import SearchFilter
+from rest_framework.pagination import PageNumberPagination
+
+from api.serializers import (
+    CategorySerializer,
+    CommentSerializer,
+    GenreSerializer,
+    GetTokenSerializer,
+    SignUpSerializer,
+    ReviewSerializer,
+    TitleSerializer,
+    UserSerializer,
+    ReviewSerializer,
+)
+from api.permissions import IsAdminOrReadOnly
+from api.paginations import ClassPagination
+
 from rest_framework_simplejwt.tokens import AccessToken
 from rest_framework.decorators import action
 from django.contrib.auth.tokens import default_token_generator
 
-from api.serializers import (CategorySerializer, GenreSerializer,
-                             GetTokenSerializer, SignUpSerializer,
-                             TitleSerializer)
 from reviews.models import Category, Comment, Genre, Review, Title
 from users.models import User
 
 from .permissions import AuthorOrReadOnly
-from .serializers import (CommentSerializer, GenreSerializer, ReviewSerializer,
-                          UserSerializer)
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -40,9 +54,27 @@ class UserViewSet(viewsets.ModelViewSet):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-class GenreViewSet(viewsets.ModelViewSet):
+class UpdateDeleteViewSet(mixins.CreateModelMixin,
+    mixins.ListModelMixin,
+    mixins.DestroyModelMixin,
+    viewsets.GenericViewSet
+):
+    permission_classes = [
+        IsAuthenticatedOrReadOnly,
+        IsAdminOrReadOnly
+    ]
+    filter_backends = (SearchFilter,)
+    search_fields = ('name', 'slug')
+    lookup_field = 'slug'
+
+
+
+
+class GenreViewSet(UpdateDeleteViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
+    permission_classes = [IsAdminOrReadOnly]
+    pagination_class = PageNumberPagination
 
 
 class CommentViewSet(viewsets.ModelViewSet):
@@ -68,9 +100,12 @@ class ReviewViewSet(viewsets.ModelViewSet):
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
     serializer_class = TitleSerializer
+    permission_classes = [IsAdminOrReadOnly]
+    pagination_class = PageNumberPagination
+    
 
 
-class CategoryViewSet(viewsets.ModelViewSet):
+class CategoryViewSet(UpdateDeleteViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
 
