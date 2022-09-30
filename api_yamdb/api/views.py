@@ -92,7 +92,7 @@ class APIGetToken(APIView):
         data = serializer.validated_data
         try:
             user = User.objects.get(username=data.get('username'))
-        except Exception as e:
+        except User.DoesNotExist:
             return Response(
                 {'username': 'Пользователь не найден!'},
                 status=status.HTTP_404_NOT_FOUND)
