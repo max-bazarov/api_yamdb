@@ -29,21 +29,23 @@ from users.models import User
 
 from .permissions import AuthorOrReadOnly, OwnerOrAdmins
 
+
 class UpdateDeleteViewSet(mixins.CreateModelMixin,
-    mixins.ListModelMixin,
-    mixins.DestroyModelMixin,
-    viewsets.GenericViewSet
-):
+                          mixins.ListModelMixin,
+                          mixins.DestroyModelMixin,
+                          viewsets.GenericViewSet
+                          ):
     pagination_class = PageNumberPagination
     filter_backends = (SearchFilter,)
     search_fields = ('name', 'slug')
     lookup_field = 'slug'
 
+
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     pagination_class = PageNumberPagination
-    permission_classes = (OwnerOrAdmins, )
+    permission_classes = [OwnerOrAdmins, ]
     filter_backends = (SearchFilter,)
     filterset_fields = ('username')
     search_fields = ('username', )
@@ -53,7 +55,7 @@ class UserViewSet(viewsets.ModelViewSet):
         methods=['get', 'patch'],
         detail=False,
         url_path='me',
-        permission_classes=(IsAuthenticated, )
+        permission_classes=[IsAuthenticated, ]
     )
     def get_patch_me(self, request):
         user = get_object_or_404(User, username=self.request.user)
@@ -64,11 +66,10 @@ class UserViewSet(viewsets.ModelViewSet):
             serializer = UserSerializer(user, data=request.data, partial=True)
             serializer.is_valid(raise_exception=True)
             serializer.save()
+            if (request.data.get('role') is not None) and request.user.role == 'user':
+                serializer.save(role='user')
             return Response(serializer.data, status=status.HTTP_200_OK)
 
-
-
-    
 
 class CategoryViewSet(UpdateDeleteViewSet):
     queryset = Category.objects.all()
@@ -77,6 +78,7 @@ class CategoryViewSet(UpdateDeleteViewSet):
         IsAuthenticatedOrReadOnly,
         IsAdminOrReadOnly
     ]
+
 
 class GenreViewSet(UpdateDeleteViewSet):
     queryset = Genre.objects.all()
@@ -87,12 +89,12 @@ class GenreViewSet(UpdateDeleteViewSet):
     ]
 
 
-
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
     serializer_class = TitleSerializer
     permission_classes = [IsAdminOrReadOnly]
     pagination_class = PageNumberPagination
+
 
 class CommentViewSet(viewsets.ModelViewSet):
     queryset = Comment.objects.all()
