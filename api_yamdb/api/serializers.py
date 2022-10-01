@@ -1,5 +1,4 @@
 from rest_framework import serializers
-
 from reviews.models import Category, Comment, Genre, Review, Title
 from users.models import User
 
@@ -19,8 +18,6 @@ class GetTokenSerializer(serializers.ModelSerializer):
 
 
 class SignUpSerializer(serializers.ModelSerializer):
-
-
     class Meta:
         model = User
         fields = ('email', 'username')
@@ -35,22 +32,19 @@ class SignUpSerializer(serializers.ModelSerializer):
 class GenreSerializer(serializers.ModelSerializer):
     class Meta:
         model = Genre
-        fields = '__all__'
+        exclude = ('id', )
+
+
+class CategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Category
+        exclude = ('id', )
 
 
 class TitleSerializer(serializers.ModelSerializer):
-    category = serializers.SlugRelatedField(
-        slug_field='slug',
-        many=False,
-        queryset=Category.objects.all()
-    )
-    genre = serializers.SlugRelatedField(
-        slug_field='slug',
-        many=True,
-        required=False,
-        queryset=Genre.objects.all()
-    )
-    rating = serializers.SerializerMethodField(read_only=True)
+    category = CategorySerializer(many=False)
+    genre = GenreSerializer(many=True)
+    rating = serializers.SerializerMethodField()
 
     def get_rating(self, obj):
         reviews = Review.objects.filter(title=obj)
@@ -60,6 +54,24 @@ class TitleSerializer(serializers.ModelSerializer):
             sum([review.score for review in reviews]) / reviews.count(),
             1
         )
+
+    class Meta:
+        model = Title
+        fields = '__all__'
+
+
+class TitleCreateSerializer(serializers.ModelSerializer):
+    genre = serializers.SlugRelatedField(
+        slug_field='slug',
+        many=True,
+        queryset=Genre.objects.all()
+    )
+    category = serializers.SlugRelatedField(
+        slug_field='slug',
+        many=False,
+        queryset=Category.objects.all(),
+    )
+    description = serializers.CharField(required=False)
 
     class Meta:
         model = Title
@@ -88,12 +100,6 @@ class ReviewSerializer(serializers.ModelSerializer):
     class Meta:
         model = Review
         fields = ('id', 'text', 'author', 'score', 'pub_date')
-
-
-class CategorySerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Category
-        fields = ('name', 'slug')
 
 
 class UserSerializer(serializers.ModelSerializer):

@@ -49,6 +49,7 @@ class Title(models.Model):
     def __str__(self) -> str:
         return self.name
 
+
 class Review(models.Model):
     text = models.TextField()
     score = models.IntegerField(
@@ -92,6 +93,6 @@ class Comment(models.Model):
         related_name='comments'
     )
     pub_date = models.DateTimeField(auto_now_add=True)
-    
+
     def __str__(self):
         return self.author

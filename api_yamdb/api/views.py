@@ -1,33 +1,22 @@
-from django.core.mail import EmailMessage
-from rest_framework.response import Response
-from rest_framework import permissions, mixins, status, viewsets
-from rest_framework.views import APIView
-from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
-from rest_framework.filters import SearchFilter
-from rest_framework.pagination import PageNumberPagination
-from django.shortcuts import get_object_or_404
-
-from api.serializers import (
-    CategorySerializer,
-    CommentSerializer,
-    GenreSerializer,
-    GetTokenSerializer,
-    SignUpSerializer,
-    ReviewSerializer,
-    TitleSerializer,
-    UserSerializer,
-    ReviewSerializer,
-)
-from api.permissions import IsAdminOrReadOnly
-
-from rest_framework_simplejwt.tokens import AccessToken
-from rest_framework.decorators import action
+from api.serializers import (CategorySerializer, CommentSerializer,
+                             GenreSerializer, GetTokenSerializer,
+                             ReviewSerializer, SignUpSerializer,
+                             TitleCreateSerializer, TitleSerializer,
+                             UserSerializer)
 from django.contrib.auth.tokens import default_token_generator
-
-from reviews.models import Category, Comment, Genre, Review, Title
+from django.core.mail import EmailMessage
+from django.shortcuts import get_object_or_404
+from rest_framework import mixins, permissions, serializers, status, viewsets
+from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework_simplejwt.tokens import AccessToken
+from reviews.models import Category, Genre, Review, Title
 from users.models import User
 
-from .permissions import AuthorOrReadOnly, OwnerOrAdmins
+from .filters import TitleFilter
+from .permissions import AuthorStaffOrReadOnly, IsAdmin, IsAdminOrReadOnly
 
 
 class UpdateDeleteViewSet(mixins.CreateModelMixin,
@@ -35,19 +24,13 @@ class UpdateDeleteViewSet(mixins.CreateModelMixin,
                           mixins.DestroyModelMixin,
                           viewsets.GenericViewSet
                           ):
-    pagination_class = PageNumberPagination
-    filter_backends = (SearchFilter,)
-    search_fields = ('name', 'slug')
-    lookup_field = 'slug'
+    pass
 
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    pagination_class = PageNumberPagination
-    permission_classes = [OwnerOrAdmins, ]
-    filter_backends = (SearchFilter,)
-    filterset_fields = ('username')
+    permission_classes = [permissions.IsAuthenticated, IsAdmin]
     search_fields = ('username', )
     lookup_field = 'username'
 
@@ -66,7 +49,9 @@ class UserViewSet(viewsets.ModelViewSet):
             serializer = UserSerializer(user, data=request.data, partial=True)
             serializer.is_valid(raise_exception=True)
             serializer.save()
-            if (request.data.get('role') is not None) and request.user.role == 'user':
+            if (
+                (request.data.get('role') is not None)
+                    and request.user.role == 'user'):
                 serializer.save(role='user')
             return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -75,45 +60,72 @@ class CategoryViewSet(UpdateDeleteViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     permission_classes = [
-        IsAuthenticatedOrReadOnly,
+        permissions.IsAuthenticatedOrReadOnly,
         IsAdminOrReadOnly
     ]
+    search_fields = ('name', 'slug')
+    lookup_field = 'slug'
 
 
 class GenreViewSet(UpdateDeleteViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
     permission_classes = [
-        IsAuthenticatedOrReadOnly,
+        permissions.IsAuthenticatedOrReadOnly,
         IsAdminOrReadOnly
     ]
+    search_fields = ('name',)
+    lookup_field = 'slug'
 
 
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
     serializer_class = TitleSerializer
-    permission_classes = [IsAdminOrReadOnly]
-    pagination_class = PageNumberPagination
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly,
+                          IsAdminOrReadOnly, ]
+    filterset_class = TitleFilter
+    filterset_fields = ('year',)
+
+    def get_serializer(self, *args, **kwargs):
+        if self.action in ('create', 'update', 'partial_update'):
+            return TitleCreateSerializer(*args, **kwargs)
+        return self.serializer_class(*args, **kwargs)
 
 
 class CommentViewSet(viewsets.ModelViewSet):
-    queryset = Comment.objects.all()
     serializer_class = CommentSerializer
-    permission_classes = [AuthorOrReadOnly]
+    permission_classes = [
+        permissions.IsAuthenticatedOrReadOnly,
+        AuthorStaffOrReadOnly,
+    ]
+
+    def get_queryset(self):
+        review = get_object_or_404(Review, id=self.kwargs.get('review_id'))
+        return review.comments.all()
 
     def perform_create(self, serializer):
-        return serializer.save(author=self.request.user)
+        review = get_object_or_404(Review, id=self.kwargs.get('review_id'))
+        return serializer.save(author=self.request.user, review=review)
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
-    queryset = Review.objects.all()
     serializer_class = ReviewSerializer
-    permission_classes = [AuthorOrReadOnly]
+    permission_classes = [
+        permissions.IsAuthenticatedOrReadOnly,
+        AuthorStaffOrReadOnly,
+    ]
+
+    def get_queryset(self):
+        title = get_object_or_404(Title, id=self.kwargs.get('title_id'))
+        return Review.objects.filter(title=title)
 
     def perform_create(self, serializer):
-        title = Title.objects.get(id=self.kwargs.get('title_id'))
-        return serializer.save(author=self.request.user,
-                               title=title)
+        title = get_object_or_404(Title, id=self.kwargs.get('title_id'))
+        if Review.objects.filter(author=self.request.user,
+                                 title=title).exists():
+            raise serializers.ValidationError(
+                'Вы уже оставили отзыв на этот произведение')
+        serializer.save(author=self.request.user, title=title)
 
 
 class APIGetToken(APIView):
