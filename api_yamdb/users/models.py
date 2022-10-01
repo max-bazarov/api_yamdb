@@ -9,6 +9,13 @@ ROLES = (
 
 
 class User(AbstractUser):
+    username = models.CharField(
+        'Имя пользователя',
+        max_length=150,
+        unique=True
+    )
+    first_name = models.CharField(max_length=150, blank=True)
+    last_name = models.CharField(max_length=150, blank=True)
     bio = models.TextField(max_length=500, blank=True)
     role = models.CharField(
         max_length=20,
@@ -18,21 +25,23 @@ class User(AbstractUser):
     )
     confirmation_code = models.CharField(max_length=100, blank=True, null=True)
     email = models.EmailField(
-        max_length=255,
+        max_length=254,
         unique=True
     )
 
-    # def __str__(self):
-    #     return self.username
+    REQUIRED_FIELDS = ['email']
 
-    # @property
-    # def is_admin(self):
-    #     return self.role == "admin" or self.is_superuser
+    def __str__(self):
+        return self.username
 
-    # @property
-    # def is_moderator(self):
-    #     return self.role == "moderator"
+    @property
+    def is_admin(self):
+        return self.role == "admin" or self.is_superuser
 
-    # @property
-    # def is_user(self):
-    #     return self.role == "user"
+    @property
+    def is_moderator(self):
+        return self.role == "moderator"
+
+    @property
+    def is_user(self):
+        return self.role == "user"

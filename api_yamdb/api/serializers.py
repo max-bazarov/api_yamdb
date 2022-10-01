@@ -19,6 +19,8 @@ class GetTokenSerializer(serializers.ModelSerializer):
 
 
 class SignUpSerializer(serializers.ModelSerializer):
+
+
     class Meta:
         model = User
         fields = ('email', 'username')
@@ -95,7 +97,6 @@ class CategorySerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
-    email = serializers.EmailField(required=True)
 
     class Meta:
         model = User
