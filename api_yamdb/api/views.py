@@ -38,7 +38,8 @@ class UpdateDeleteViewSet(mixins.CreateModelMixin,
     filter_backends = (SearchFilter,)
     search_fields = ('name', 'slug')
     lookup_field = 'slug'
-class UserViewSet(UpdateDeleteViewSet):
+
+class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     pagination_class = PageNumberPagination
