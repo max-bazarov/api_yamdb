@@ -1,6 +1,8 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
+from core.validators import validate_username
+
 ROLES = (
     ('user', 'user'),
     ('moderator', 'moderator'),
@@ -12,7 +14,8 @@ class User(AbstractUser):
     username = models.CharField(
         'Имя пользователя',
         max_length=150,
-        unique=True
+        unique=True,
+        validators=[validate_username],
     )
     first_name = models.CharField(max_length=150, blank=True)
     last_name = models.CharField(max_length=150, blank=True)

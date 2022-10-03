@@ -1,32 +1,31 @@
 from rest_framework import serializers
+
+from core.validators import validate_username
 from reviews.models import Category, Comment, Genre, Review, Title
 from users.models import User
 
 
-class GetTokenSerializer(serializers.ModelSerializer):
-    username = serializers.CharField(
-        required=True)
-    confirmation_code = serializers.CharField(
-        required=True)
+class GetTokenSerializer(serializers.Serializer):
+    username = serializers.CharField(required=True)
+    confirmation_code = serializers.CharField(required=True)
 
-    class Meta:
-        model = User
-        fields = (
-            'username',
-            'confirmation_code'
-        )
+    def create(self, validated_data):
+        return User.objects.create(**validated_data)
 
 
-class SignUpSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ('email', 'username')
+class SignUpSerializer(serializers.Serializer):
+    email = serializers.EmailField(required=True)
+    username = serializers.CharField(required=True,
+                                     validators=[validate_username])
 
-    def validate_username(self, value):
-        if value == 'me':
-            raise serializers.ValidationError(
-                'Недопустимое имя пользователя')
-        return value
+    def create(self, validated_data):
+        return User.objects.create(**validated_data)
+
+    def update(self, instance, validated_data):
+        instance.email = validated_data.get('email', instance.email)
+        instance.username = validated_data.get('username', instance.username)
+        instance.save()
+        return instance
 
 
 class GenreSerializer(serializers.ModelSerializer):
@@ -44,16 +43,7 @@ class CategorySerializer(serializers.ModelSerializer):
 class TitleSerializer(serializers.ModelSerializer):
     category = CategorySerializer(many=False)
     genre = GenreSerializer(many=True)
-    rating = serializers.SerializerMethodField()
-
-    def get_rating(self, obj):
-        reviews = Review.objects.filter(title=obj)
-        if reviews.count() == 0:
-            return None
-        return round(
-            sum([review.score for review in reviews]) / reviews.count(),
-            1
-        )
+    rating = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = Title

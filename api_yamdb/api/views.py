@@ -1,10 +1,7 @@
-from api.serializers import (CategorySerializer, CommentSerializer,
-                             GenreSerializer, GetTokenSerializer,
-                             ReviewSerializer, SignUpSerializer,
-                             TitleCreateSerializer, TitleSerializer,
-                             UserSerializer)
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import EmailMessage
+from django.db import IntegrityError
+from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from rest_framework import mixins, permissions, serializers, status, viewsets
 from rest_framework.decorators import action
@@ -12,6 +9,12 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import AccessToken
+
+from api.serializers import (CategorySerializer, CommentSerializer,
+                             GenreSerializer, GetTokenSerializer,
+                             ReviewSerializer, SignUpSerializer,
+                             TitleCreateSerializer, TitleSerializer,
+                             UserSerializer)
 from reviews.models import Category, Genre, Review, Title
 from users.models import User
 
@@ -90,6 +93,14 @@ class TitleViewSet(viewsets.ModelViewSet):
         if self.action in ('create', 'update', 'partial_update'):
             return TitleCreateSerializer(*args, **kwargs)
         return self.serializer_class(*args, **kwargs)
+
+    def get_queryset(self):
+        return (
+            Title.objects
+            .prefetch_related('genre')
+            .select_related('category')
+            .annotate(rating=Avg('reviews__score'))
+        )
 
 
 class CommentViewSet(viewsets.ModelViewSet):
@@ -181,7 +192,19 @@ class APISignup(APIView):
     def post(self, request):
         serializer = SignUpSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        user = serializer.save()
+        try:
+            user, created = (
+                User
+                .objects
+                .get_or_create(
+                    username=serializer.validated_data.get('username'),
+                    email=serializer.validated_data.get('email')
+                )
+            )
+        except IntegrityError:
+            return Response(
+                {'username': 'Пользователь с таким именем уже существует!'},
+                status=status.HTTP_400_BAD_REQUEST)
         confirmation_code = default_token_generator.make_token(user)
         user.confirmation_code = confirmation_code
         user.save()
@@ -194,6 +217,5 @@ class APISignup(APIView):
             'to_email': user.email,
             'email_subject': 'Код подтверждения для доступа к API!'
         }
-        print(data)
         self.send_email(data)
         return Response(serializer.data, status=status.HTTP_200_OK)

@@ -30,3 +30,25 @@ python3 manage.py migrate
 ```
 python3 manage.py runserver
 ```
+
+## Пример запросов
+- Регистрация пользователя
+```
+POST /api/v1/auth/signup/
+{
+    "email": "test@test.com",
+    "username": "test"
+}
+```
+- Получение JWT-токена
+```
+POST /api/v1/auth/token/
+{
+    "username": "test",
+    "confirmation_code": "12345"
+}
+```
+- Получение списка всех категорий
+```
+GET /api/v1/categories/
+```
