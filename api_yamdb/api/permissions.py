@@ -10,7 +10,6 @@ class AuthorOrReadOnly(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
         return (
             obj.author == request.user
-            or request.user.is_moderator
         )
 
 
@@ -19,16 +18,11 @@ class OwnerOrAdmins(permissions.BasePermission):
     def has_permission(self, request, view):
         return (
             request.user.is_authenticated
-            and (
-                request.user.is_admin
-                or request.user.is_superuser)
+            and request.user.is_admin
         )
 
     def has_object_permission(self, request, view, obj):
-        return (
-            obj == request.user
-            or request.user.is_admin
-            or request.user.is_superuser)
+        return (obj == request.user)
 
 
 class OwnerOrStaff(permissions.BasePermission):
@@ -41,9 +35,7 @@ class OwnerOrStaff(permissions.BasePermission):
         )
 
     def has_object_permission(self, request, view, obj):
-        return (
-            obj == request.user
-            or request.user.is_staff)
+        return (obj == request.user)
 
 
 class AuthorStaffOrReadOnly(permissions.BasePermission):

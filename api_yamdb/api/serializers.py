@@ -18,15 +18,6 @@ class SignUpSerializer(serializers.Serializer):
     username = serializers.CharField(required=True,
                                      validators=[validate_username])
 
-    def create(self, validated_data):
-        return User.objects.create(**validated_data)
-
-    def update(self, instance, validated_data):
-        instance.email = validated_data.get('email', instance.email)
-        instance.username = validated_data.get('username', instance.username)
-        instance.save()
-        return instance
-
 
 class GenreSerializer(serializers.ModelSerializer):
     class Meta:
@@ -93,7 +84,6 @@ class ReviewSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = User
         fields = ('username',
@@ -104,7 +94,4 @@ class UserSerializer(serializers.ModelSerializer):
                   'last_name')
 
     def validate_username(self, value):
-        if value == 'me':
-            raise serializers.ValidationError(
-                'Недопустимое имя пользователя')
-        return value
+        return validate_username(value)

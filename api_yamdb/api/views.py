@@ -193,12 +193,11 @@ class APISignup(APIView):
         serializer = SignUpSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         try:
-            user, created = (
+            user, _ = (
                 User
                 .objects
                 .get_or_create(
-                    username=serializer.validated_data.get('username'),
-                    email=serializer.validated_data.get('email')
+                    **serializer.validated_data
                 )
             )
         except IntegrityError:

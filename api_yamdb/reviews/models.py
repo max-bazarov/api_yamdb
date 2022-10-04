@@ -39,7 +39,7 @@ class Title(models.Model):
         verbose_name='Жанр'
     )
     name = models.CharField(max_length=256)
-    year = models.IntegerField(validators=[validate_year])
+    year = models.PositiveSmallIntegerField()
     description = models.TextField(
         null=True,
         verbose_name='Описание'
@@ -97,4 +97,4 @@ class Comment(models.Model):
     pub_date = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return self.author
+        return self.text[:TEXT_LENGTH]
