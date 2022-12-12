@@ -15,23 +15,13 @@
 
 ## Установка и запуск
 - Склонируйте репозиторий на свой компьютер
-- Создайте и активируйте виртуальное окружение
-```
-python3 -m venv venv
-source venv/Scripts/activate
-```
-- Установите зависимости из файла requirements.txt
-```
-pip3 install -r requirements.txt
-```
-- Выполните миграции
-```
-python3 manage.py migrate
-```
-- Запустите сервер
-```
-python3 manage.py runserver
-```
+- Измените файл .env.dist на .env и заполните его
+- Убедитесь, что у вас установлен Docker и Docker Compose последних версий
+- Запустите проект командой `docker-compose up`
+- При первом запуске проекта необходимо выполнить миграции командой `docker-compose exec web python manage.py migrate`
+- Создайте суперпользователя командой `docker-compose exec web python manage.py createsuperuser`
+- Соберите статику командой `docker-compose exec web python manage.py collectstatic`
+- Проект доступен по адресу http://localhost:8000/ 
 
 ## Пример запросов
 - Регистрация пользователя
