@@ -26,7 +26,7 @@
 - При первом запуске проекта необходимо выполнить миграции командой `docker-compose exec web python manage.py migrate`
 - Создайте суперпользователя командой `docker-compose exec web python manage.py createsuperuser`
 - Соберите статику командой `docker-compose exec web python manage.py collectstatic`
-- Проект доступен по адресу http://localhost:8000/ 
+- Проект доступен по адресу http://localhost
 
 ## Пример запросов
 - Регистрация пользователя
